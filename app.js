@@ -22,6 +22,7 @@ app.use(cors());
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/recipes', recipesRouter);
+app.use("/uploads", express.static("uploads"));
 
 // const connection = mysql.createConnection({
 //   host: "localhost",
