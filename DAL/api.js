@@ -149,6 +149,20 @@ function validateUserSession(res, userid, sessionid, validity) {
   }
 }
 
+function getMeasurements(res) {
+    connection.query("SELECT * FROM measurements", (err, result) => {
+        if (err) throw err;
+        res.send(result);
+    })
+}
+
+function getIngredients(res) {
+    connection.query("SELECT * FROM ingredients", (err, result) => {
+        if (err) throw err;
+        res.send(result);
+    })
+}
+
 module.exports = {
   getRecipes,
   getRecipeById,
@@ -157,4 +171,6 @@ module.exports = {
   startUserSession,
   endUserSession,
   validateUserSession,
+  getMeasurements,
+  getIngredients
 };

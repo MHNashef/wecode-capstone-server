@@ -5,6 +5,8 @@ const {
   getRecipeById,
   getRecipeInstructions,
   getRecipeIngredients,
+  getMeasurements,
+  getIngredients
 } = require("../DAL/api");
 
 router.get("/", function (req, res) {
@@ -34,6 +36,14 @@ router.get("/recipeId/:id/instructions", function (req, res) {
 
 router.get("/recipeId/:id/ingredients", function (req, res) {
   getRecipeIngredients(res, req.params.id);
+});
+
+router.get("/get/measurements", function (req, res) {
+  getMeasurements(res);
+});
+
+router.get("/get/ingredients", function (req, res) {
+  getIngredients(res);
 });
 
 module.exports = router;
