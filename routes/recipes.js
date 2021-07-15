@@ -25,6 +25,7 @@ router.get("/popular/:limit", function (req, res) {
 
 router.get("/recipeId/:id", function (req, res) {
   getRecipeById(res, req.params.id);
+  // getRecipeById((result) => res.send(result), req.params.id);
 });
 
 router.get("/recipeId/:id/instructions", function (req, res) {
