@@ -48,7 +48,6 @@ router.get("/get/ingredients", function (req, res) {
 });
 
 router.post("/create/recipe", function(req, res) {
-  console.log("Print if you see me");
   createRecipe(res, req.body);
 });
 
