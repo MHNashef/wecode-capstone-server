@@ -6,7 +6,8 @@ const {
   getRecipeInstructions,
   getRecipeIngredients,
   getMeasurements,
-  getIngredients
+  getIngredients,
+  createRecipe
 } = require("../DAL/api");
 
 router.get("/", function (req, res) {
@@ -44,6 +45,11 @@ router.get("/get/measurements", function (req, res) {
 
 router.get("/get/ingredients", function (req, res) {
   getIngredients(res);
+});
+
+router.post("/create/recipe", function(req, res) {
+  console.log("Print if you see me");
+  createRecipe(res, req.body);
 });
 
 module.exports = router;
