@@ -63,6 +63,28 @@ function getRecipeIngredients(res, recipeId) {
   );
 }
 
+function getDietTypes(res, user_id) {
+  try {
+    if (user_id) {
+      connection.query(
+        `SELECT * FROM user_diet_type WHERE user_id=${user_id}`,
+        (err, result) => {
+          if (err) throw err;
+          res.send(result);
+        }
+      );
+    } else {
+      connection.query(`SELECT * FROM diet_type`, (err, result) => {
+        if (err) throw err;
+        res.send(result);
+      });
+    }
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ msg: "Failed to get diet types" });
+  }
+}
+
 function startUserSession(res, userName, pwd) {
   if (userName && pwd) {
     // check username & pwd
@@ -163,6 +185,40 @@ function getIngredients(res) {
   });
 }
 
+function createNewUser(res, newUser) {
+  if (newUser) {
+    try {
+      // TBD: might want to first check if there's another user w/ same email
+      // or can create this constraint on the DB side
+      connection.query(
+        `INSERT INTO users (first_name, last_name, user_password, email)
+          VALUES('${newUser.first_name}', '${newUser.last_name}', '${newUser.user_password}', '${newUser.email}')`,
+        (err, result) => {
+          if (err) throw err;
+
+          if (newUser.diettype) {
+            newUser.diettype.forEach((element) => {
+              connection.query(
+                `INSERT INTO user_diet_type (user_id, diet_type_id) VALUES (${result.insertId}, ${element})`,
+                (err, result) => {
+                  if (err) throw err;
+                }
+              );
+            });
+          }
+          res?.status(200).json({ msg: "User created" });
+        }
+      );
+    } catch (err) {
+      console.log(err);
+    }
+  } else {
+    // TBD: there are other place where this could fail, but queries seem to be async
+    // and we can't guarantee serial execution of code. figure a better way of doing this
+    res?.status(500).json({ msg: "Update failed" });
+  }
+}
+
 function createRecipe(res, recipe) {
   let newRecipeId = 0;
   //   //   let addedInstructions = false;
@@ -179,106 +235,50 @@ function createRecipe(res, recipe) {
         console.log(result);
 
         newRecipeId = result.insertId;
-        recipe.ingredients.forEach((ingredient) => {
-          connection.query(`INSERT INTO recipe_ingredients (recipe_id, amount, measurement_id, ingredient_id, notes)
+        recipe.ingredients.forEach(
+          (ingredient) => {
+            connection.query(`INSERT INTO recipe_ingredients (recipe_id, amount, measurement_id, ingredient_id, notes)
             VALUES (${newRecipeId}, ${ingredient.amount}, ${ingredient.measurement_id}, ${ingredient.ingredient_id}, '${ingredient.notes}')`);
-        }, (err, result) => {
+          },
+          (err, result) => {
             if (err) throw err;
-        });
+          }
+        );
 
-        recipe.instructions.forEach((instruction) => {
-          connection.query(`INSERT INTO instructions (recipe_id, step_number, step_description)
+        recipe.instructions.forEach(
+          (instruction) => {
+            connection.query(`INSERT INTO instructions (recipe_id, step_number, step_description)
             VALUES (${newRecipeId}, ${instruction.stepNum}, '${instruction.instruction}')`);
-        }, (err, result) => {
+          },
+          (err, result) => {
             if (err) throw err;
-        });
+          }
+        );
 
-        recipe.dietType.forEach((type) => {
-          connection.query(`INSERT INTO recipe_diet_type (recipe_id, diet_type_id)
+        recipe.dietType.forEach(
+          (type) => {
+            connection.query(`INSERT INTO recipe_diet_type (recipe_id, diet_type_id)
             VALUES (${newRecipeId}, ${type})`);
-        }, (err, result) => {
+          },
+          (err, result) => {
             if (err) throw err;
-        });
+          }
+        );
 
-        recipe.mealType.forEach((type) => {
-          connection.query(`INSERT INTO recipe_meal_type (recipe_id, meal_type_id)
+        recipe.mealType.forEach(
+          (type) => {
+            connection.query(`INSERT INTO recipe_meal_type (recipe_id, meal_type_id)
             VALUES (${newRecipeId}, ${type})`);
-        }, (err, result) => {
+          },
+          (err, result) => {
             if (err) throw err;
-        });
+          }
+        );
       }
     );
   } catch (err) {
     console.log(err);
   }
-
-  //   try {
-  //     connection.query(
-  //         `INSERT INTO recipes (user_id, recipe_name, general_info, views, date_created, public)
-  //       VALUES (1, 'gg', 'gfg',
-  //         0, NOW(), 0)`,
-  //     //     `INSERT INTO recipes (user_id, recipe_name, general_info, views, date_created, public)
-  //     //   VALUES (${recipe.user_id}, '${recipe.recipe_name}', '${
-  //     //       recipe.general_info
-  //     //     }',
-  //     //     0, NOW(), b'${recipe.public ? 1 : 0}')`,
-  //         (err, result) => {
-  //             if (err) throw err;
-
-  //             connection.query(
-  //           `SELECT MAX(id) as last_id from recipes`,
-  //           (err, result) => {
-  //             if (err) throw err;
-
-  //             if (result[0]?.last_id) {
-  //               // we have the new recipe id, now let's add the ingredients & instructions
-  //               recipe_id = result[0].last_id;
-
-  //               if (recipe.ingredients) {
-  //                 // add ingredients
-  //                 recipe.ingredients.forEach((element) => {
-  //                   connection.query(
-  //                     `INSERT INTO recipe_ingredients (recipe_id, amount, measurement_id, ingredient_id, notes)
-  //                 VALUES (${recipe_id}, element.amount, element.measurement_id, element.ingredient_id, 'element.notes')`,
-  //                     (err, result) => {
-  //                       if (err) throw err;
-  //                     }
-  //                   );
-  //                 });
-  //                 addedIngredients = true;
-  //               }
-
-  //               if (recipe.instructions) {
-  //                 // add instructions
-  //                 recipe.instructions.forEach((element) => {
-  //                   connection.query(
-  //                     `INSERT INTO instructions (recipe_id, step_number, step_description)
-  //                 VALUES (${recipe_id}, element.step_number, 'element.step_description')`,
-  //                     (err, result) => {
-  //                       if (err) throw err;
-  //                     }
-  //                   );
-  //                 });
-  //                 addedInstructions = true;
-  //               }
-  //             }
-  //           }
-  //         );
-  //       }
-  //     );
-  //   } catch (err) {
-  //     console.log(err);
-  //     console.log(`Delete recipe: ${recipe_id} failed`);
-  //   }
-
-  //   if (recipe_id > 0 && addedInstructions && addedIngredients) {
-  //     res?.status(200).json({ recipe_id: `${recipe_id}` });
-  //   } else {
-  //     if (recipe_id > 0) {
-  //       deleteRecipe(null, recipe_id);
-  //     }
-  //     res?.status(500).json({ recipe_id: "Create new recipe failed" });
-  //   }
 }
 
 module.exports = {
@@ -292,44 +292,6 @@ module.exports = {
   getMeasurements,
   getIngredients,
   createRecipe,
+  getDietTypes,
+  createNewUser,
 };
-
-// {
-//     "recipe_name":"Food",
-//     "general_info":"very good food",
-//     "public": "1",
-//     "recipe_diet_type":["3"],
-//     "recipe_meal_type":["3"],
-//     "ingredients":[
-//         {
-//             "amount":"1",
-//             "measurement_id": "1",
-//             "ingredient_id": "1",
-//             "notes":"stam note"
-//         }
-//     ],
-//     "instructions":[
-//         {
-//             "step_number":"1",
-//             "step_description": "stam instruction"
-//         }
-//     ]
-// }
-
-// {
-//     recipeName: 'food',
-//     recipeDescription: 'very good food',
-//     visibility: '1',
-//     dietType: [ '1' ],
-//     mealType: [ '1' ],
-//     ingredients: [
-//       {
-//         id: 0,
-//         amount: '1',
-//         measurement_id: '1',
-//         ingredient_id: '2',
-//         notes: 'asdf'
-//       }
-//     ],
-//     instructions: [ { '0': [Object], stepNum: '1', instruction: 'asdf' } ]
-//   }
