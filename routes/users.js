@@ -6,13 +6,18 @@ const {
   endUserSession,
   validateUserSession,
   getDietTypes,
-  createNewUser
+  createNewUser,
+  getUserById
 } = require("../DAL/api");
 
 /* GET users listing. */
 router.get("/", function (req, res, next) {
   res.send("respond with a resource");
 });
+
+router.get("/:id", function (req, res) {
+  getUserById(res, req.params.id);
+})
 
 router.get("/testuser", function (req, res) {
   startUserSession(res, "hishamnshf@gmail.com", "123Asdf$");

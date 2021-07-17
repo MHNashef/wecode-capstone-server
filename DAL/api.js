@@ -219,6 +219,13 @@ function createNewUser(res, newUser) {
   }
 }
 
+function getUserById(res, id) {
+    connection.query(`SELECT * FROM users WHERE id = ${id}`, (err, result) => {
+        if (err) throw err;
+        res.send(result);
+    });
+}
+
 function createRecipe(res, recipe) {
   let newRecipeId = 0;
   //   //   let addedInstructions = false;
@@ -294,4 +301,5 @@ module.exports = {
   createRecipe,
   getDietTypes,
   createNewUser,
+  getUserById
 };
