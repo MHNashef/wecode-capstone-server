@@ -63,6 +63,28 @@ function getRecipeIngredients(res, recipeId) {
   );
 }
 
+function getDietTypes(res, user_id) {
+  try {
+    if (user_id) {
+      connection.query(
+        `SELECT * FROM user_diet_type WHERE user_id=${user_id}`,
+        (err, result) => {
+          if (err) throw err;
+          res.send(result);
+        }
+      );
+    } else {
+      connection.query(`SELECT * FROM diet_type`, (err, result) => {
+        if (err) throw err;
+        res.send(result);
+      });
+    }
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ msg: "Failed to get diet types" });
+  }
+}
+
 function startUserSession(res, userName, pwd) {
   if (userName && pwd) {
     // check username & pwd
@@ -149,6 +171,116 @@ function validateUserSession(res, userid, sessionid, validity) {
   }
 }
 
+function getMeasurements(res) {
+  connection.query("SELECT * FROM measurements", (err, result) => {
+    if (err) throw err;
+    res.send(result);
+  });
+}
+
+function getIngredients(res) {
+  connection.query("SELECT * FROM ingredients", (err, result) => {
+    if (err) throw err;
+    res.send(result);
+  });
+}
+
+function createNewUser(res, newUser) {
+  if (newUser) {
+    try {
+      // TBD: might want to first check if there's another user w/ same email
+      // or can create this constraint on the DB side
+      connection.query(
+        `INSERT INTO users (first_name, last_name, user_password, email)
+          VALUES('${newUser.first_name}', '${newUser.last_name}', '${newUser.user_password}', '${newUser.email}')`,
+        (err, result) => {
+          if (err) throw err;
+
+          if (newUser.diettype) {
+            newUser.diettype.forEach((element) => {
+              connection.query(
+                `INSERT INTO user_diet_type (user_id, diet_type_id) VALUES (${result.insertId}, ${element})`,
+                (err, result) => {
+                  if (err) throw err;
+                }
+              );
+            });
+          }
+          res?.status(200).json({ msg: "User created" });
+        }
+      );
+    } catch (err) {
+      console.log(err);
+    }
+  } else {
+    // TBD: there are other place where this could fail, but queries seem to be async
+    // and we can't guarantee serial execution of code. figure a better way of doing this
+    res?.status(500).json({ msg: "Update failed" });
+  }
+}
+
+function createRecipe(res, recipe) {
+  let newRecipeId = 0;
+  //   //   let addedInstructions = false;
+  //   //   let addedIngredients = false;
+  //
+  console.log(recipe);
+  try {
+    connection.query(
+      // TBD: fix user id
+      `INSERT INTO recipes (user_id, recipe_name, general_info, views, image, date_created, public)
+      VALUES (7, '${recipe.recipeName}', '${recipe.recipeDescription}', 0, 'uploads/oatmeal.jpeg' ,NOW(), ${recipe.visibility})`,
+      (err, result) => {
+        if (err) throw err;
+        console.log(result);
+
+        newRecipeId = result.insertId;
+        recipe.ingredients.forEach(
+          (ingredient) => {
+            connection.query(`INSERT INTO recipe_ingredients (recipe_id, amount, measurement_id, ingredient_id, notes)
+            VALUES (${newRecipeId}, ${ingredient.amount}, ${ingredient.measurement_id}, ${ingredient.ingredient_id}, '${ingredient.notes}')`);
+          },
+          (err, result) => {
+            if (err) throw err;
+          }
+        );
+
+        recipe.instructions.forEach(
+          (instruction) => {
+            connection.query(`INSERT INTO instructions (recipe_id, step_number, step_description)
+            VALUES (${newRecipeId}, ${instruction.stepNum}, '${instruction.instruction}')`);
+          },
+          (err, result) => {
+            if (err) throw err;
+          }
+        );
+
+        recipe.dietType.forEach(
+          (type) => {
+            connection.query(`INSERT INTO recipe_diet_type (recipe_id, diet_type_id)
+            VALUES (${newRecipeId}, ${type})`);
+          },
+          (err, result) => {
+            if (err) throw err;
+          }
+        );
+
+        recipe.mealType.forEach(
+          (type) => {
+            connection.query(`INSERT INTO recipe_meal_type (recipe_id, meal_type_id)
+            VALUES (${newRecipeId}, ${type})`);
+          },
+          (err, result) => {
+            if (err) throw err;
+          }
+        );
+      }
+    );
+  } catch (err) {
+    console.log(err);
+  }
+}
+
 module.exports = {
   getRecipes,
   getRecipeById,
@@ -157,4 +289,9 @@ module.exports = {
   startUserSession,
   endUserSession,
   validateUserSession,
+  getMeasurements,
+  getIngredients,
+  createRecipe,
+  getDietTypes,
+  createNewUser,
 };

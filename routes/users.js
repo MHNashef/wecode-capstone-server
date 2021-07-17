@@ -5,6 +5,8 @@ const {
   startUserSession,
   endUserSession,
   validateUserSession,
+  getDietTypes,
+  createNewUser
 } = require("../DAL/api");
 
 /* GET users listing. */
@@ -14,6 +16,19 @@ router.get("/", function (req, res, next) {
 
 router.get("/testuser", function (req, res) {
   startUserSession(res, "hishamnshf@gmail.com", "123Asdf$");
+});
+
+router.get("/diettypes", function (req, res) {
+  getDietTypes(res, null);
+});
+
+router.post("/signup", function (req, res) {
+  console.log(req.body);
+  if (req.body) {
+    createNewUser(res, req.body);
+  } else {
+    res.status(400).json({ msg: "Bad POST request" });
+  }
 });
 
 router.post("/login", function (req, res) {
