@@ -39,8 +39,6 @@ router.post(
     connection.query(sqlQuery, (err, result) => {
       if (err) throw err;
       res.status(200).json({ imgId: result.insertId, imgPath: req.file.path });
-      //   const txt = JSON.stringify(rows);
-      //   return res.send(txt);
     });
   }
 );
