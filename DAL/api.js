@@ -219,6 +219,23 @@ function createNewUser(res, newUser) {
   }
 }
 
+function getUserById(res, id) {
+  connection.query(`SELECT * FROM users WHERE id = ${id}`, (err, result) => {
+    if (err) throw err;
+    res.send(result);
+  });
+}
+
+function getUserDiet(res, id) {
+  connection.query(
+    `SELECT diet_type_id FROM user_diet_type WHERE user_id = ${id}`,
+    (err, result) => {
+      if (err) throw err;
+      res.send(result);
+    }
+  );
+}
+
 function createRecipe(res, recipe) {
   let newRecipeId = 0;
   //   //   let addedInstructions = false;
@@ -281,6 +298,41 @@ function createRecipe(res, recipe) {
   }
 }
 
+function updateUser(res, userInfo) {
+  try {
+    connection.query(
+      `UPDATE users 
+          SET first_name = '${userInfo.first_name}', last_name = '${userInfo.last_name}', 
+          user_password = '${userInfo.user_password}', email = '${userInfo.email}'  
+          WHERE id = ${userInfo.id}`,
+      (err, result) => {
+        if (err) throw err;
+      }
+    );
+
+    connection.query(
+      `DELETE FROM user_diet_type WHERE user_id = ${userInfo.id}`,
+      (err, result) => {
+        if (err) throw err;
+      }
+    );
+
+    userInfo.diettype.forEach((type) => {
+      connection.query(
+        `INSERT INTO user_diet_type (user_id, diet_type_id)
+          VALUES (${userInfo.id}, ${type})`,
+        (err, result) => {
+          if (err) throw err;
+        }
+      );
+    });
+
+    res.status(200).json({ msg: "Your information has been updated :)"});
+  } catch (err) {
+    console.log(err);
+  }
+}
+
 module.exports = {
   getRecipes,
   getRecipeById,
@@ -294,4 +346,7 @@ module.exports = {
   createRecipe,
   getDietTypes,
   createNewUser,
+  getUserById,
+  getUserDiet,
+  updateUser,
 };
