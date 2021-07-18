@@ -7,7 +7,9 @@ const {
   validateUserSession,
   getDietTypes,
   createNewUser,
-  getUserById
+  getUserById,
+  getUserDiet,
+  updateUser
 } = require("../DAL/api");
 
 /* GET users listing. */
@@ -15,9 +17,13 @@ router.get("/", function (req, res, next) {
   res.send("respond with a resource");
 });
 
-router.get("/:id", function (req, res) {
+router.get("/userId/:id", function (req, res) {
   getUserById(res, req.params.id);
-})
+});
+
+router.get("/diet/:id", function (req, res) {
+  getUserDiet(res, req.params.id);
+});
 
 router.get("/testuser", function (req, res) {
   startUserSession(res, "hishamnshf@gmail.com", "123Asdf$");
@@ -80,6 +86,10 @@ router.post("/validatesession", function (req, res) {
   } else {
     res.status(400).json({ msg: "Bad POST request" });
   }
+});
+
+router.put("/updateUser", function (req, res) {
+  updateUser(res, req.body);
 });
 
 module.exports = router;
