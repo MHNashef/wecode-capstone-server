@@ -3,11 +3,16 @@ var router = express.Router();
 const {
   getRecipes,
   getRecipeById,
+  getMealTypes,
+  getRecipeMealType,
+  getDietTypes,
+  getRecipeDietType,
   getRecipeInstructions,
   getRecipeIngredients,
   getMeasurements,
   getIngredients,
-  createRecipe
+  createRecipe,
+  updateRecipe,
 } = require("../DAL/api");
 
 router.get("/", function (req, res) {
@@ -30,7 +35,21 @@ router.get("/recipeId/:id", function (req, res) {
   getRecipeById(res, req.params.id);
   // getRecipeById((result) => res.send(result), req.params.id);
 });
+router.get("/list/mealtypes", function (req, res) {
+  getMealTypes(res);
+});
 
+router.get("/recipeId/:id/mealtype", function (req, res) {
+  getRecipeMealType(res, req.params.id);
+});
+
+router.get("/list/diettypes", function (req, res) {
+  getDietTypes(res);
+});
+
+router.get("/recipeId/:id/diettype", function (req, res) {
+  getRecipeDietType(res, req.params.id);
+});
 router.get("/recipeId/:id/instructions", function (req, res) {
   getRecipeInstructions(res, req.params.id);
 });
@@ -50,5 +69,7 @@ router.get("/get/ingredients", function (req, res) {
 router.post("/create/recipe", function(req, res) {
   createRecipe(res, req.body);
 });
-
+router.put("/update/recipe", function (req, res) {
+  updateRecipe(res, req.body);
+});
 module.exports = router;
