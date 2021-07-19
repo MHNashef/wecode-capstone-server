@@ -11,11 +11,11 @@ connection.connect((err) => {
 });
 
 function getRecipes(res, orderBy, limit, where) {
-    let myQuery =
+  let myQuery =
     "SELECT recipes.*, images.img_path FROM recipes JOIN images ON images.id = recipes.image";
   if (orderBy) myQuery += ` ORDER BY ${orderBy} desc`; // TBD
   if (limit) myQuery += ` LIMIT ${limit}`;
-console.log(myQuery);
+  console.log(myQuery);
   connection.query(myQuery, (err, result) => {
     if (err) throw err;
     res.send(result);
@@ -41,38 +41,38 @@ function getRecipeById(res, recipeId) {
 //   );
 // }
 function getMealTypes(res) {
-    connection.query(`SELECT * FROM meal_type`, (err, result) => {
+  connection.query(`SELECT * FROM meal_type`, (err, result) => {
+    if (err) throw err;
+    res.send(result);
+  });
+}
+
+function getRecipeMealType(res, recipeId) {
+  connection.query(
+    `SELECT * FROM recipe_meal_type JOIN meal_type ON meal_type_id = id WHERE recipe_id = ${recipeId}`,
+    (err, result) => {
       if (err) throw err;
       res.send(result);
-    });
-  }
-  
-  function getRecipeMealType(res, recipeId) {
-    connection.query(
-      `SELECT * FROM recipe_meal_type JOIN meal_type ON meal_type_id = id WHERE recipe_id = ${recipeId}`,
-      (err, result) => {
-        if (err) throw err;
-        res.send(result);
-      }
-    );
-  }
-  
-  function getDietTypes(res) {
-    connection.query(`SELECT * FROM diet_type`, (err, result) => {
+    }
+  );
+}
+
+function getDietTypes(res) {
+  connection.query(`SELECT * FROM diet_type`, (err, result) => {
+    if (err) throw err;
+    res.send(result);
+  });
+}
+
+function getRecipeDietType(res, recipeId) {
+  connection.query(
+    `SELECT * FROM recipe_diet_type JOIN diet_type ON diet_type_id = id WHERE recipe_id = ${recipeId}`,
+    (err, result) => {
       if (err) throw err;
       res.send(result);
-    });
-  }
-  
-  function getRecipeDietType(res, recipeId) {
-    connection.query(
-      `SELECT * FROM recipe_diet_type JOIN diet_type ON diet_type_id = id WHERE recipe_id = ${recipeId}`,
-      (err, result) => {
-        if (err) throw err;
-        res.send(result);
-      }
-    );
-  }
+    }
+  );
+}
 function getRecipeInstructions(res, recipeId) {
   connection.query(
     `SELECT * FROM instructions WHERE recipe_id = ${recipeId} ORDER BY step_number ASC`,
@@ -269,97 +269,97 @@ function getUserDiet(res, id) {
   );
 }
 function updateRecipe(res, recipe) {
-    const recipeId = recipe.recipe_id;
-  
-    console.log(recipe);
-    try {
-      connection.query(
-        `UPDATE recipes SET recipe_name = '${recipe.recipeName}', general_info = '${recipe.recipeDescription}', image= '${recipe.image}', public = ${recipe.visibility} WHERE (id = ${recipeId});`,
-        (err, result) => {
-          if (err) throw err;
-          console.log(result);
-  
-          // INGREDIENTS
-          connection.query(
-            `DELETE FROM recipe_ingredients WHERE recipe_id = ${recipeId}`,
-            (err, result) => {
-              if (err) throw err;
-              console.log(result);
-  
-              recipe.ingredients.forEach(
-                (ingredient) => {
-                  connection.query(`INSERT INTO recipe_ingredients (recipe_id, amount, measurement_id, ingredient_id, notes)
+  const recipeId = recipe.recipe_id;
+
+  console.log(recipe);
+  try {
+    connection.query(
+      `UPDATE recipes SET recipe_name = '${recipe.recipeName}', general_info = '${recipe.recipeDescription}', image= '${recipe.image}', public = ${recipe.visibility} WHERE (id = ${recipeId});`,
+      (err, result) => {
+        if (err) throw err;
+        console.log(result);
+
+        // INGREDIENTS
+        connection.query(
+          `DELETE FROM recipe_ingredients WHERE recipe_id = ${recipeId}`,
+          (err, result) => {
+            if (err) throw err;
+            console.log(result);
+
+            recipe.ingredients.forEach(
+              (ingredient) => {
+                connection.query(`INSERT INTO recipe_ingredients (recipe_id, amount, measurement_id, ingredient_id, notes)
                 VALUES (${recipeId}, ${ingredient.amount}, ${ingredient.measurement_id}, ${ingredient.ingredient_id}, '${ingredient.notes}')`);
-                },
-                (err, result) => {
-                  if (err) throw err;
-                }
-              );
-            }
-          );
-  
-          // INSTRUCTIONS
-          connection.query(
-            `DELETE FROM instructions WHERE recipe_id = ${recipeId}`,
-            (err, result) => {
-              if (err) throw err;
-              console.log(result);
-  
-              recipe.instructions.forEach(
-                (instruction) => {
-                  connection.query(`INSERT INTO instructions (recipe_id, step_number, step_description)
+              },
+              (err, result) => {
+                if (err) throw err;
+              }
+            );
+          }
+        );
+
+        // INSTRUCTIONS
+        connection.query(
+          `DELETE FROM instructions WHERE recipe_id = ${recipeId}`,
+          (err, result) => {
+            if (err) throw err;
+            console.log(result);
+
+            recipe.instructions.forEach(
+              (instruction) => {
+                connection.query(`INSERT INTO instructions (recipe_id, step_number, step_description)
                   VALUES (${recipeId}, ${instruction.step_number}, '${instruction.step_description}')`);
-                },
-                (err, result) => {
-                  if (err) throw err;
-                }
-              );
-            }
-          );
-  
-          // DIET TYPE
-          connection.query(
-            `DELETE FROM recipe_diet_type WHERE recipe_id = ${recipeId}`,
-            (err, result) => {
-              if (err) throw err;
-              console.log(result);
-  
-              recipe.dietType.forEach(
-                (type) => {
-                  connection.query(`INSERT INTO recipe_diet_type (recipe_id, diet_type_id)
+              },
+              (err, result) => {
+                if (err) throw err;
+              }
+            );
+          }
+        );
+
+        // DIET TYPE
+        connection.query(
+          `DELETE FROM recipe_diet_type WHERE recipe_id = ${recipeId}`,
+          (err, result) => {
+            if (err) throw err;
+            console.log(result);
+
+            recipe.dietType.forEach(
+              (type) => {
+                connection.query(`INSERT INTO recipe_diet_type (recipe_id, diet_type_id)
                   VALUES (${recipeId}, ${type})`);
-                },
-                (err, result) => {
-                  if (err) throw err;
-                }
-              );
-            }
-          );
-  
-          // MEAL TYPE
-          connection.query(
-            `DELETE FROM recipe_meal_type WHERE recipe_id = ${recipeId}`,
-            (err, result) => {
-              if (err) throw err;
-              console.log(result);
-  
-              recipe.mealType.forEach(
-                (type) => {
-                  connection.query(`INSERT INTO recipe_meal_type (recipe_id, meal_type_id)
+              },
+              (err, result) => {
+                if (err) throw err;
+              }
+            );
+          }
+        );
+
+        // MEAL TYPE
+        connection.query(
+          `DELETE FROM recipe_meal_type WHERE recipe_id = ${recipeId}`,
+          (err, result) => {
+            if (err) throw err;
+            console.log(result);
+
+            recipe.mealType.forEach(
+              (type) => {
+                connection.query(`INSERT INTO recipe_meal_type (recipe_id, meal_type_id)
                   VALUES (${recipeId}, ${type})`);
-                },
-                (err, result) => {
-                  if (err) throw err;
-                }
-              );
-            }
-          );
-        }
-      );
-    } catch (err) {
-      console.log(err);
-    }
+              },
+              (err, result) => {
+                if (err) throw err;
+              }
+            );
+          }
+        );
+      }
+    );
+  } catch (err) {
+    console.log(err);
   }
+}
 function createRecipe(res, recipe) {
   let newRecipeId = 0;
   //   //   let addedInstructions = false;
@@ -451,9 +451,26 @@ function updateUser(res, userInfo) {
       );
     });
 
-    res.status(200).json({ msg: "Your information has been updated :)"});
+    res.status(200).json({ msg: "Your information has been updated :)" });
   } catch (err) {
     console.log(err);
+  }
+}
+
+function getSearchRes(res, searchStr) {
+  try {
+    connection.query(
+      `SELECT recipes.*, images.img_path 
+      FROM recipes 
+      JOIN images ON recipes.image = images.id 
+      WHERE MATCH(recipe_name) AGAINST(${searchStr})`,
+      (err, result) => {
+        if (err) throw err;
+        res.send(result);
+      }
+    );
+  } catch (err) {
+    if (err) throw err;
   }
 }
 
@@ -478,4 +495,5 @@ module.exports = {
   getUserById,
   getUserDiet,
   updateUser,
+  getSearchRes,
 };
