@@ -20,7 +20,11 @@ const {
 } = require("../DAL/api");
 
 router.get("/", function (req, res) {
-  getRecipes(res);
+  getRecipes(res, 'date_created');
+});
+
+router.get("/popular", function (req, res) {
+  getRecipes(res, 'views');
 });
 
 router.get("/count", function (req, res) {
@@ -28,7 +32,11 @@ router.get("/count", function (req, res) {
 });
 
 router.get("/l/:limit/p/:page", function (req, res) {
-  getRecipes(res, null, req.params.limit, req.params.page);
+  getRecipes(res, "date_created", req.params.limit, req.params.page);
+});
+
+router.get("/l/:limit/p/:page/popular", function (req, res) {
+  getRecipes(res, "views", req.params.limit, req.params.page);
 });
 
 router.get("/:limit", function (req, res) {

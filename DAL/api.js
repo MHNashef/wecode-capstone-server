@@ -13,6 +13,8 @@ connection.connect((err) => {
 function getRecipes(res, orderBy, limit, page) {
   let myQuery =
     "SELECT recipes.*, images.img_path FROM recipes JOIN images ON images.id = recipes.image";
+  // orderBy = orderBy || "date_created";
+
   if (orderBy) myQuery += ` ORDER BY ${orderBy} desc`; // TBD
   if (limit) {
     if (page) {
@@ -22,6 +24,7 @@ function getRecipes(res, orderBy, limit, page) {
       myQuery += ` LIMIT ${limit}`;
     }
   }
+
   connection.query(myQuery, (err, result) => {
     if (err) throw err;
     res.send(result);
@@ -567,5 +570,5 @@ module.exports = {
   getSearchRes,
   getRecipeViews,
   incrementViews,
-  getSearchCount
+  getSearchCount,
 };
