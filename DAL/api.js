@@ -431,7 +431,7 @@ function createRecipe(res, recipe) {
           }
         );
 
-        res.send(result);
+        // res.send(result.insertId);
       }
     );
   } catch (err) {
