@@ -10,16 +10,34 @@ connection.connect((err) => {
   if (err) throw err;
 });
 
-function getRecipes(res, orderBy, limit, where) {
+function getRecipes(res, orderBy, limit, page) {
   let myQuery =
     "SELECT recipes.*, images.img_path FROM recipes JOIN images ON images.id = recipes.image";
+  // orderBy = orderBy || "date_created";
+
   if (orderBy) myQuery += ` ORDER BY ${orderBy} desc`; // TBD
-  if (limit) myQuery += ` LIMIT ${limit}`;
-  console.log(myQuery);
+  if (limit) {
+    if (page) {
+      const offset = Number(limit) * (Number(page) - 1);
+      myQuery += ` LIMIT ${offset}, ${limit}`;
+    } else {
+      myQuery += ` LIMIT ${limit}`;
+    }
+  }
+
   connection.query(myQuery, (err, result) => {
     if (err) throw err;
     res.send(result);
   });
+}
+function getRecipesCount(res) {
+  connection.query(
+    "SELECT COUNT(*) AS 'count' FROM recipes JOIN images ON images.id = recipes.image",
+    (err, result) => {
+      if (err) throw err;
+      res.send(result);
+    }
+  );
 }
 
 function getRecipeById(res, recipeId) {
@@ -415,6 +433,8 @@ function createRecipe(res, recipe) {
             if (err) throw err;
           }
         );
+
+        // res.send(result.insertId);
       }
     );
   } catch (err) {
@@ -457,13 +477,12 @@ function updateUser(res, userInfo) {
   }
 }
 
-function getSearchRes(res, searchStr) {
+function getSearchCount(res, searchStr) {
   try {
     connection.query(
-      `SELECT recipes.*, images.img_path 
-      FROM recipes 
+      `SELECT COUNT(*) as count FROM recipes 
       JOIN images ON recipes.image = images.id 
-      WHERE MATCH(recipe_name) AGAINST(${searchStr})`,
+      WHERE MATCH(recipe_name) AGAINST('${searchStr}')`,
       (err, result) => {
         if (err) throw err;
         res.send(result);
@@ -474,8 +493,61 @@ function getSearchRes(res, searchStr) {
   }
 }
 
+function getSearchRes(res, searchStr, orderBy, limit, page) {
+  try {
+    let myQuery = `SELECT recipes.*, images.img_path 
+    FROM recipes 
+    JOIN images ON recipes.image = images.id 
+    WHERE MATCH(recipe_name) AGAINST('${searchStr}')`;
+
+    if (orderBy) myQuery += ` ORDER BY ${orderBy} desc`; // TBD
+    if (limit) {
+      if (page) {
+        const offset = Number(limit) * (Number(page) - 1);
+        myQuery += ` LIMIT ${offset}, ${limit}`;
+      } else {
+        myQuery += ` LIMIT ${limit}`;
+      }
+    }
+    connection.query(myQuery, (err, result) => {
+      if (err) throw err;
+      res.send(result);
+    });
+  } catch (err) {
+    if (err) throw err;
+  }
+}
+
+function getRecipeViews(res, id) {
+  try {
+    connection.query(
+      `SELECT views FROM recipes WHERE id = ${id}`,
+      (err, result) => {
+        if (err) throw err;
+        res.send(result);
+      }
+    );
+  } catch (err) {
+    if (err) throw err;
+  }
+}
+
+function incrementViews(res, recipeId) {
+  try {
+    connection.query(
+      `UPDATE recipes SET views = views + 1 WHERE id = ${recipeId}`,
+      (err, result) => {
+        if (err) throw err;
+      }
+    );
+  } catch (err) {
+    if (err) throw err;
+  }
+}
+
 module.exports = {
   getRecipes,
+  getRecipesCount,
   getRecipeById,
   getMealTypes,
   getRecipeMealType,
@@ -496,4 +568,7 @@ module.exports = {
   getUserDiet,
   updateUser,
   getSearchRes,
+  getRecipeViews,
+  incrementViews,
+  getSearchCount,
 };

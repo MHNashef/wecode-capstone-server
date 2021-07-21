@@ -2,6 +2,7 @@ var express = require("express");
 var router = express.Router();
 const {
   getRecipes,
+  getRecipesCount,
   getRecipeById,
   getMealTypes,
   getRecipeMealType,
@@ -13,10 +14,29 @@ const {
   getIngredients,
   createRecipe,
   updateRecipe,
+  getRecipeViews,
+  incrementViews,
+  getSearchCount
 } = require("../DAL/api");
 
 router.get("/", function (req, res) {
-  getRecipes(res);
+  getRecipes(res, 'date_created');
+});
+
+router.get("/popular", function (req, res) {
+  getRecipes(res, 'views');
+});
+
+router.get("/count", function (req, res) {
+  getRecipesCount(res);
+});
+
+router.get("/l/:limit/p/:page", function (req, res) {
+  getRecipes(res, "date_created", req.params.limit, req.params.page);
+});
+
+router.get("/l/:limit/p/:page/popular", function (req, res) {
+  getRecipes(res, "views", req.params.limit, req.params.page);
 });
 
 router.get("/:limit", function (req, res) {
@@ -66,9 +86,18 @@ router.get("/get/ingredients", function (req, res) {
   getIngredients(res);
 });
 
+router.get("/get/views/:id", function (req, res) {
+  getRecipeViews(res, req.params.id);
+})
+
 router.post("/create/recipe", function(req, res) {
   createRecipe(res, req.body);
 });
+
+router.put("/increment/views/:recipeId", function(req, res) {
+  incrementViews(res, req.params.recipeId);
+})
+
 router.put("/update/recipe", function (req, res) {
   updateRecipe(res, req.body);
 });
