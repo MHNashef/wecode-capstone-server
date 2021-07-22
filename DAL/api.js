@@ -49,6 +49,58 @@ function getRecipeById(res, recipeId) {
     }
   );
 }
+
+function getUserRecipes(res, userId) {
+  connection.query(
+    `SELECT * FROM recipes JOIN images ON images.id = recipes.image WHERE recipes.user_id = ${userId}`,
+    (err, result) => {
+      if (err) throw err;
+      res.send(result);
+    }
+  );
+}
+
+function setAsFavorite(res, body) {
+  connection.query(
+    `INSERT INTO favorites(user_id, recipe_id) VALUES (${body.userId}, ${body.recipeId})`,
+    (err, result) => {
+      if (err) throw err;
+    }
+  );
+}
+
+function rmvFromFavorites(res, body) {
+  connection.query(
+    `DELETE FROM favorites WHERE user_id = ${body.userId} AND recipe_id = ${body.recipeId}`,
+    (err, result) => {
+      if (err) throw err;
+    }
+  );
+}
+
+function getFavRecipes(res, userId) {
+  connection.query(
+    `SELECT recipes.*, images.img_path FROM favorites 
+  JOIN recipes ON favorites.recipe_id = recipes.id 
+  JOIN images ON images.id = recipes.image
+  WHERE favorites.user_id = ${userId}`,
+    (err, result) => {
+      if (err) throw err;
+      res.send(result);
+    }
+  );
+}
+
+function getIsFavorite(res, userId, recipeId) {
+  connection.query(
+    `SELECT COUNT(*) as count FROM favorites WHERE user_id = ${userId} AND recipe_id = ${recipeId}`,
+    (err, result) => {
+      if (err) throw err;
+      res.send(result);
+    }
+  );
+}
+
 // function getRecipeById(callback, recipeId) {
 //   connection.query(
 //     `SELECT * FROM recipes WHERE id = ${recipeId}`,
@@ -571,4 +623,9 @@ module.exports = {
   getRecipeViews,
   incrementViews,
   getSearchCount,
+  getUserRecipes,
+  setAsFavorite,
+  rmvFromFavorites,
+  getFavRecipes,
+  getIsFavorite,
 };

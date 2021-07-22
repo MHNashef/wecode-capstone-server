@@ -9,7 +9,11 @@ const {
   createNewUser,
   getUserById,
   getUserDiet,
-  updateUser
+  updateUser,
+  setAsFavorite,
+  rmvFromFavorites,
+  getFavRecipes,
+  getIsFavorite,
 } = require("../DAL/api");
 
 /* GET users listing. */
@@ -31,6 +35,18 @@ router.get("/testuser", function (req, res) {
 
 router.get("/diettypes", function (req, res) {
   getDietTypes(res, null);
+});
+
+router.get("/getFavorites/user/:id", function (req, res) {
+  getFavRecipes(res, req.params.id);
+});
+
+router.get("/isFavorite/user/:id/recipe/:recId", function (req, res) {
+  getIsFavorite(res, req.params.id, req.params.recId);
+});
+
+router.post("/setFavorite/", function (req, res) {
+  setAsFavorite(res, req.body);
 });
 
 router.post("/signup", function (req, res) {
@@ -86,6 +102,10 @@ router.post("/validatesession", function (req, res) {
   } else {
     res.status(400).json({ msg: "Bad POST request" });
   }
+});
+
+router.put("/removeFavorite", function (req, res) {
+  rmvFromFavorites(res, req.body);
 });
 
 router.put("/updateUser", function (req, res) {

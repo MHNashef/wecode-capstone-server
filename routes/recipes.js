@@ -16,7 +16,8 @@ const {
   updateRecipe,
   getRecipeViews,
   incrementViews,
-  getSearchCount
+  getSearchCount,
+  getUserRecipes
 } = require("../DAL/api");
 
 router.get("/", function (req, res) {
@@ -50,6 +51,10 @@ router.get("/recent/:limit", function (req, res) {
 router.get("/popular/:limit", function (req, res) {
   getRecipes(res, "views", req.params.limit);
 });
+
+router.get("/recipe/userId/:userId", function (req, res) {
+  getUserRecipes(res, req.params.userId);
+})
 
 router.get("/recipeId/:id", function (req, res) {
   getRecipeById(res, req.params.id);
