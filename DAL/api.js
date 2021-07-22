@@ -440,7 +440,7 @@ function createRecipe(res, recipe) {
     connection.query(
       // TBD: fix user id
       `INSERT INTO recipes (user_id, recipe_name, general_info, views, image, date_created, public)
-      VALUES (${recipe.user_id}, '${recipe.recipeName}', '${recipe.recipeDescription}', 0, ${recipe.image} ,NOW(), ${recipe.visibility})`,
+      VALUES (${recipe.user_id}, '${recipe.recipeName}', '${recipe.recipeDescription}', 0, ${recipe.image} ,NOW(), 1)`,
       (err, result) => {
         if (err) throw err;
         console.log(result);
