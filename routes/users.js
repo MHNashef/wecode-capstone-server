@@ -50,7 +50,6 @@ router.post("/setFavorite/", function (req, res) {
 });
 
 router.post("/signup", function (req, res) {
-  console.log(req.body);
   if (req.body) {
     createNewUser(res, req.body);
   } else {
@@ -59,7 +58,6 @@ router.post("/signup", function (req, res) {
 });
 
 router.post("/login", function (req, res) {
-  console.log(req.body);
   if (req.body) {
     const email = req.body.email;
     const password = req.body.password;
@@ -75,7 +73,6 @@ router.post("/login", function (req, res) {
 });
 
 router.post("/logout", function (req, res) {
-  console.log(req.body);
   if (req.body) {
     const sessionid = req.body.sessionid;
     try {
@@ -90,7 +87,6 @@ router.post("/logout", function (req, res) {
 });
 
 router.post("/validatesession", function (req, res) {
-  console.log(req.body);
   if (req.body) {
     const { id, session_id, validity } = req.body;
     try {

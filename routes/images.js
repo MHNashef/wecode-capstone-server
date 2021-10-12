@@ -35,7 +35,7 @@ router.post(
   upload.single("recipeImg"),
   function (req, res, next) {
     const sqlQuery = `INSERT INTO images (img_path) VALUES ('${req.file.path}')`;
-    console.log(sqlQuery);
+
     connection.query(sqlQuery, (err, result) => {
       if (err) throw err;
       res.status(200).json({ imgId: result.insertId, imgPath: req.file.path });
