@@ -13,9 +13,8 @@ connection.connect((err) => {
 function getRecipes(res, orderBy, limit, page) {
   let myQuery =
     "SELECT recipes.*, images.img_path FROM recipes JOIN images ON images.id = recipes.image";
-  // orderBy = orderBy || "date_created";
 
-  if (orderBy) myQuery += ` ORDER BY ${orderBy} desc`; // TBD
+  if (orderBy) myQuery += ` ORDER BY ${orderBy} desc`; 
   if (limit) {
     if (page) {
       const offset = Number(limit) * (Number(page) - 1);
@@ -101,15 +100,6 @@ function getIsFavorite(res, userId, recipeId) {
   );
 }
 
-// function getRecipeById(callback, recipeId) {
-//   connection.query(
-//     `SELECT * FROM recipes WHERE id = ${recipeId}`,
-//     (err, result) => {
-//       if (err) throw err;
-//       callback(result);
-//     }
-//   );
-// }
 function getMealTypes(res) {
   connection.query(`SELECT * FROM meal_type`, (err, result) => {
     if (err) throw err;
@@ -217,10 +207,9 @@ function startUserSession(res, userName, pwd) {
               if (err) throw err;
             }
           );
-          // TBD: this is setting cookie on Postman but not on client (why?)
+          
           res.cookie("sessionid", sessionid);
           res.status(200).json(result);
-          //res.send(result);
         } else {
           // user login attempt failed
           res.status(403).json({ msg: "Login failed!" });
@@ -247,7 +236,6 @@ function endUserSession(res, sessionid) {
 }
 
 function validateUserSession(res, userid, sessionid, validity) {
-  //TBD: we're only validating session here so better to move to a different function
   if (userid && sessionid) {
     connection.query(
       `SELECT last_login FROM users WHERE id = ${userid} AND session_id = '${sessionid}'`,
@@ -259,7 +247,7 @@ function validateUserSession(res, userid, sessionid, validity) {
         if (result[0]?.last_login) {
           const sessionDate = new Date(result[0].last_login);
           const today = new Date();
-          const sessionValidFor = validity * 60 * 60 * 1000; // in millisecs
+          const sessionValidFor = validity * 60 * 60 * 1000; 
 
           console.log("sessionDate: " + sessionDate);
           if (Math.abs(today - sessionDate) < sessionValidFor)
@@ -291,8 +279,6 @@ function getIngredients(res) {
 function createNewUser(res, newUser) {
   if (newUser) {
     try {
-      // TBD: might want to first check if there's another user w/ same email
-      // or can create this constraint on the DB side
       connection.query(
         `INSERT INTO users (first_name, last_name, user_password, email)
           VALUES('${newUser.first_name}', '${newUser.last_name}', '${newUser.user_password}', '${newUser.email}')`,
@@ -316,8 +302,7 @@ function createNewUser(res, newUser) {
       console.log(err);
     }
   } else {
-    // TBD: there are other place where this could fail, but queries seem to be async
-    // and we can't guarantee serial execution of code. figure a better way of doing this
+    
     res?.status(500).json({ msg: "Update failed" });
   }
 }
@@ -349,7 +334,6 @@ function updateRecipe(res, recipe) {
         if (err) throw err;
         console.log(result);
 
-        // INGREDIENTS
         connection.query(
           `DELETE FROM recipe_ingredients WHERE recipe_id = ${recipeId}`,
           (err, result) => {
@@ -368,7 +352,6 @@ function updateRecipe(res, recipe) {
           }
         );
 
-        // INSTRUCTIONS
         connection.query(
           `DELETE FROM instructions WHERE recipe_id = ${recipeId}`,
           (err, result) => {
@@ -387,7 +370,6 @@ function updateRecipe(res, recipe) {
           }
         );
 
-        // DIET TYPE
         connection.query(
           `DELETE FROM recipe_diet_type WHERE recipe_id = ${recipeId}`,
           (err, result) => {
@@ -406,7 +388,6 @@ function updateRecipe(res, recipe) {
           }
         );
 
-        // MEAL TYPE
         connection.query(
           `DELETE FROM recipe_meal_type WHERE recipe_id = ${recipeId}`,
           (err, result) => {
@@ -432,13 +413,8 @@ function updateRecipe(res, recipe) {
 }
 function createRecipe(res, recipe) {
   let newRecipeId = 0;
-  //   //   let addedInstructions = false;
-  //   //   let addedIngredients = false;
-  //
-  console.log(recipe);
   try {
     connection.query(
-      // TBD: fix user id
       `INSERT INTO recipes (user_id, recipe_name, general_info, views, image, date_created, public)
       VALUES (${recipe.user_id}, '${recipe.recipeName}', '${recipe.recipeDescription}', 0, ${recipe.image} ,NOW(), 1)`,
       (err, result) => {
@@ -486,7 +462,6 @@ function createRecipe(res, recipe) {
           }
         );
 
-        // res.send(result.insertId);
       }
     );
   } catch (err) {
@@ -552,7 +527,7 @@ function getSearchRes(res, searchStr, orderBy, limit, page) {
     JOIN images ON recipes.image = images.id 
     WHERE MATCH(recipe_name) AGAINST('${searchStr}')`;
 
-    if (orderBy) myQuery += ` ORDER BY ${orderBy} desc`; // TBD
+    if (orderBy) myQuery += ` ORDER BY ${orderBy} desc`;
     if (limit) {
       if (page) {
         const offset = Number(limit) * (Number(page) - 1);
